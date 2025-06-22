@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);  
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.chat-bubble.bot {
+  background-color: #f4f4f4;
+  color: #222;
+  padding: 1rem;
+  border-radius: 1rem;
+  font-size: 14px;
+  max-width: 100%;
+  line-height: 1.6;
+}
+
+/* Style markdown-like HTML */
+.chat-bubble.bot strong {
+  font-weight: bold;
+  color: #cc0000;
+}
+
+.chat-bubble.bot ul {
+  padding-left: 1.2rem;
+  list-style-type: disc;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.chat-bubble.bot li {
+  margin-bottom: 0.25rem;
+}
+
+.chat-bubble.bot p {
+  margin-bottom: 0.5rem;
+}
+
+.chat-bubble.bot em {
+  font-style: italic;
+  color: #666;
+}
