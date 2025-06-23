@@ -10,6 +10,15 @@ interface Message {
 }
 
 export default function ChatAssistant() {
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+
+    const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLImageElement;
+      if (target.tagName === 'IMG') {
+        setModalImageUrl(target.src);
+      }
+    };
+
     const router = useRouter();
   const [showTemplates, setShowTemplates] = useState(true);
 
@@ -136,6 +145,23 @@ const handleTemplateClick = (text: string) => {
         ? 'bg-gradient-to-br from-slate-900 to-slate-800' 
         : 'bg-gradient-to-br from-slate-50 to-gray-100'
     }`}>
+
+      {modalImageUrl && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setModalImageUrl(null)}>
+    <img
+      src={modalImageUrl}
+      alt="Preview"
+      className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg border border-white"
+    />
+    <button
+      className="absolute top-6 right-6 text-white bg-black/50 hover:bg-black/80 rounded-full p-2"
+      onClick={() => setModalImageUrl(null)}
+    >
+      ✕
+    </button>
+  </div>
+)}
+
       {/* Modern Sidebar */}
       <div className={`w-80 hidden lg:flex flex-col backdrop-blur-xl border-r transition-all duration-300 ${
         isDarkMode 
@@ -160,7 +186,7 @@ const handleTemplateClick = (text: string) => {
               <p className={`text-sm transition-colors ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                Cifera 0.4.0
+                Cifera 0.5.0
               </p>
             </div>
           </div>
@@ -337,26 +363,30 @@ const handleTemplateClick = (text: string) => {
                               : 'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg hover:shadow-xl'
                           }`}>
                             <div
-                              className={`
-                                prose prose-sm max-w-none leading-relaxed
-                                ${message.isBot 
-                                  ? isDarkMode 
-                                    ? 'prose-invert prose-slate' 
-                                    : 'prose-gray'
-                                  : 'prose-red prose-invert'
-                                }
-                                prose-headings:mb-3 prose-headings:mt-4 prose-headings:font-semibold
-                                prose-p:mb-3 prose-p:mt-0 prose-p:leading-relaxed
-                                prose-ul:my-2 prose-ol:my-2 prose-li:my-1
-                                prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
-                                ${isDarkMode ? 'prose-code:bg-white prose-code:bg-opacity-10' : 'prose-code:bg-gray-800 prose-code:bg-opacity-10'}
-                                prose-pre:bg-gray-900 prose-pre:rounded-lg prose-pre:p-4 prose-pre:overflow-x-auto
-                                prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:italic
-                                prose-table:border-collapse prose-th:border prose-td:border prose-th:p-2 prose-td:p-2
-                                prose-a:text-blue-400 hover:prose-a:text-blue-300 prose-a:no-underline hover:prose-a:underline
-                              `}
-                              dangerouslySetInnerHTML={{ __html: message.text }}
-                            />
+                            className={`
+                              prose prose-sm max-w-none leading-relaxed
+                              relative group
+                              [&_img]:cursor-zoom-in
+                              [&_img]:rounded-lg [&_img]:shadow-md [&_img]:max-h-[400px] [&_img]:object-contain
+                              ${message.isBot 
+                                ? isDarkMode 
+                                  ? 'prose-invert prose-slate' 
+                                  : 'prose-gray'
+                                : 'prose-red prose-invert'
+                              }
+                              prose-headings:mb-3 prose-headings:mt-4 prose-headings:font-semibold
+                              prose-p:mb-3 prose-p:mt-0 prose-p:leading-relaxed
+                              prose-ul:my-2 prose-ol:my-2 prose-li:my-1
+                              prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+                              ${isDarkMode ? 'prose-code:bg-white prose-code:bg-opacity-10' : 'prose-code:bg-gray-800 prose-code:bg-opacity-10'}
+                              prose-pre:bg-gray-900 prose-pre:rounded-lg prose-pre:p-4 prose-pre:overflow-x-auto
+                              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:italic
+                              prose-table:border-collapse prose-th:border prose-td:border prose-th:p-2 prose-td:p-2
+                              prose-a:text-blue-400 hover:prose-a:text-blue-300 prose-a:no-underline hover:prose-a:underline
+                            `}
+                            dangerouslySetInnerHTML={{ __html: message.text }}
+                            onClick={handleImageClick}
+                          />
 
                     <div className={`text-xs mt-2 ${
                       message.isBot
