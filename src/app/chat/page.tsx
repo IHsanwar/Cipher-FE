@@ -101,7 +101,7 @@ const handleTemplateClick = (text: string) => {
 
 
   // Create a centralized API function with proper session handling
-const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = 'https://cipher.ihsanwd10.my.id';
 
 const apiCall = async (endpoint: string, options: RequestInit = {}) => {
   const defaultOptions: RequestInit = {
