@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect, KeyboardEvent }from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import Image from 'next/image';
+
 interface Message {
   id: number;
   text: string;
@@ -9,39 +10,33 @@ interface Message {
   timestamp: Date;
 }
 
+interface SurveyData {
+  nama: string;
+  instansi: string;
+  tampilan_produk: string;
+  tampilan_stand: string;
+  penjelasan_produk: string;
+  hiburan: string;
+  kritik_saran: string;
+}
+
+interface ApiResponse {
+  reply_html: string;
+  reply: string;
+  debug?: unknown;
+}
+
 export default function ChatAssistant() {
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
-  const stripHtmlTags = (html: string): string => {
-  const div = document.createElement("div");
-  div.innerHTML = html;
-  return div.textContent || div.innerText || "";
-};
 
-
-    const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
-      const target = e.target as HTMLImageElement;
-      if (target.tagName === 'IMG') {
-        setModalImageUrl(target.src);
-      }
-    };
-
-    const router = useRouter();
-
+  const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLImageElement;
+    if (target.tagName === 'IMG') {
+      setModalImageUrl(target.src);
+    }
+  };
 
   const [showTemplates, setShowTemplates] = useState(true);
-
-
-
-  const [surveyData, setSurveyData] = useState({
-  nama: "",
-  instansi: "",
-  tampilan_produk: "",
-  tampilan_stand: "",
-  penjelasan_produk: "",
-  hiburan: "",
-  kritik_saran: ""
-});
-
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [messages, setMessages] = useState<Message[]>([
@@ -60,187 +55,146 @@ export default function ChatAssistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-useEffect(() => {
-  const links = document.querySelectorAll('.chat-bubble a');
-  links.forEach(link => {
-    link.classList.add(
-      'inline-flex', 'items-center', 'gap-1',
-      'text-blue-500', 'hover:underline'
-    );
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noopener noreferrer');
+  useEffect(() => {
+    const links = document.querySelectorAll('.chat-bubble a');
+    links.forEach(link => {
+      link.classList.add(
+        'inline-flex', 'items-center', 'gap-1',
+        'text-blue-500', 'hover:underline'
+      );
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
 
-    // Tambahkan ikon eksternal
-    if (!link.querySelector('.external-icon')) {
-      const icon = document.createElement('span');
-      icon.innerHTML = `
+      // Tambahkan ikon eksternal
+      if (!link.querySelector('.external-icon')) {
+        const icon = document.createElement('span');
+        icon.innerHTML = `
 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 3h7m0 0v7m0-7L10 14" />
 </svg>
 `;
 
-      icon.classList.add('external-icon', 'text-xs');
-      link.appendChild(icon);
-    }
-  });
-}, [messages]);
-
-
-
+        icon.classList.add('external-icon', 'text-xs');
+        link.appendChild(icon);
+      }
+    });
+  }, [messages]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-
-const handleTemplateClick = (text: string) => {
-  setShowTemplates(false); // sembunyikan setelah klik
-  handleSendMessage(text); // langsung kirim tanpa isi input box
-};
-
-
+  const handleTemplateClick = (text: string) => {
+    setShowTemplates(false); // sembunyikan setelah klik
+    handleSendMessage(text); // langsung kirim tanpa isi input box
+  };
 
   // Create a centralized API function with proper session handling
-const API_BASE = 'https://cipher.ihsanwd10.my.id';
+  const API_BASE = 'https://cipher.ihsanwd10.my.id';
 
-const apiCall = async (endpoint: string, options: RequestInit = {}) => {
-  const defaultOptions: RequestInit = {
-    credentials: 'include', // Always include cookies/session
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    },
-    ...options
-  };
-
-  try {
-    const response = await fetch(`${API_BASE}${endpoint}`, defaultOptions);
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP ${response.status}`);
-    }
-    
-    return data;
-  } catch (error) {
-    console.error(`API call failed for ${endpoint}:`, error);
-    throw error;
-  }
-};
-
-// Updated handleSendMessage function
-const handleSendMessage = async (messageText?: string) => {
-  const textToSend = messageText !== undefined ? messageText : inputMessage;
-  if (!textToSend.trim()) return;
-
-  const userMessage: Message = {
-    id: Date.now(),
-    text: textToSend,
-    isBot: false,
-    timestamp: new Date()
-  };
-
-  setMessages(prev => [...prev, userMessage]);
-  setInputMessage('');
-  setIsTyping(true);
-
-  try {
-    // Use the centralized API call function
-    const data = await apiCall('/api/chat', {
-      method: 'POST',
-      body: JSON.stringify({ message: textToSend })
-    });
-
-    const botMessage: Message = {
-      id: Date.now() + 1,
-      text: data.reply_html,
-      isBot: true,
-      timestamp: new Date()
+  const apiCall = async (endpoint: string, options: RequestInit = {}) => {
+    const defaultOptions: RequestInit = {
+      credentials: 'include', // Always include cookies/session
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
     };
-    setMessages(prev => [...prev, botMessage]);
 
-    // Debug session info
-    console.log("🔍 Session Debug:", data.debug);
-    console.log("📝 Bot reply content:", data.reply);
-
-    // Handle survey payload extraction
-    let extractedPayload: any = null;
-    const payloadMatch = data.reply.match(/```json([\s\S]*?)```/);
-    if (payloadMatch) {
-      const jsonRaw = payloadMatch[1].trim();
-      extractedPayload = JSON.parse(jsonRaw);
-
-      // Send survey data
-      await apiCall('/api/kirim-survey', {
-        method: 'POST',
-        body: JSON.stringify(extractedPayload)
-      });
-
-      console.log("✅ Survey data sent via payload block.");
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, defaultOptions);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error(`API call failed for ${endpoint}:`, error);
+      throw error;
     }
+  };
 
-    // Alternative survey sending
-    if (data.reply.includes("#SEND_SURVEY:OK") && extractedPayload) {
-      await apiCall('/api/kirim-survey', {
-        method: 'POST',
-        body: JSON.stringify(extractedPayload)
-      });
+  // Updated handleSendMessage function
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText !== undefined ? messageText : inputMessage;
+    if (!textToSend.trim()) return;
 
-      console.log("✅ Survey data sent via #SEND_SURVEY:OK tag.");
-    }
-
-  } catch (err: any) {
-    console.error("❌ Error:", err);
-    setMessages(prev => [...prev, {
-      id: Date.now() + 2,
-      text: "⚠️ Error: " + (err.message || 'Terjadi kesalahan'),
-      isBot: true,
-      timestamp: new Date()
-    }]);
-  } finally {
-    setIsTyping(false);
-  }
-};
-
-// Updated handleSetName function
-const handleSetName = async () => {
-  const username = prompt("Masukkan nama kamu:");
-  if (!username) return alert("Nama tidak boleh kosong!");
-
-  try {
-    const data = await apiCall('/api/setname', {
-      method: 'POST',
-      body: JSON.stringify({ username })
-    });
-
-    const botMessage: Message = {
+    const userMessage: Message = {
       id: Date.now(),
-      text: data.message,
-      isBot: true,
+      text: textToSend,
+      isBot: false,
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, botMessage]);
-  } catch (err: any) {
-    console.error(err);
-    alert(err.message || 'Terjadi kesalahan');
-  }
-};
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage('');
+    setIsTyping(true);
 
-// Add a debug function to check session status
-const checkSessionStatus = async () => {
-  try {
-    const data = await apiCall('/api/session-debug');
-    console.log("🔍 Session Status:", data);
-    alert(`Session ID: ${data.session_id}\nHistory: ${data.history_length} messages\nUsername: ${data.username}`);
-  } catch (err: any) {
-    console.error("Session check failed:", err);
-  }
-};
+    try {
+      // Use the centralized API call function
+      const data = await apiCall('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message: textToSend })
+      }) as ApiResponse;
 
-// Add this button to your component for debugging
-//
+      const botMessage: Message = {
+        id: Date.now() + 1,
+        text: data.reply_html,
+        isBot: true,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMessage]);
 
+      // Debug session info
+      console.log("🔍 Session Debug:", data.debug);
+      console.log("📝 Bot reply content:", data.reply);
+
+      // Handle survey payload extraction
+      let extractedPayload: SurveyData | null = null;
+      const payloadMatch = data.reply.match(/```json([\s\S]*?)```/);
+      if (payloadMatch) {
+        const jsonRaw = payloadMatch[1].trim();
+        extractedPayload = JSON.parse(jsonRaw) as SurveyData;
+
+        // Send survey data
+        await apiCall('/api/kirim-survey', {
+          method: 'POST',
+          body: JSON.stringify(extractedPayload)
+        });
+
+        console.log("✅ Survey data sent via payload block.");
+      }
+
+      // Alternative survey sending
+      if (data.reply.includes("#SEND_SURVEY:OK") && extractedPayload) {
+        await apiCall('/api/kirim-survey', {
+          method: 'POST',
+          body: JSON.stringify(extractedPayload)
+        });
+
+        console.log("✅ Survey data sent via #SEND_SURVEY:OK tag.");
+      }
+
+    } catch (err) {
+      console.error("❌ Error:", err);
+      const errorMessage = err instanceof Error ? err.message : 'Terjadi kesalahan';
+      setMessages(prev => [...prev, {
+        id: Date.now() + 2,
+        text: "⚠️ Error: " + errorMessage,
+        isBot: true,
+        timestamp: new Date()
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+
+  // Add a debug function to check session status
+  
 
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -257,20 +211,22 @@ const checkSessionStatus = async () => {
     }`}>
 
       {modalImageUrl && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setModalImageUrl(null)}>
-    <img
-      src={modalImageUrl}
-      alt="Preview"
-      className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg border border-white"
-    />
-    <button
-      className="absolute top-6 right-6 text-white bg-black/50 hover:bg-black/80 rounded-full p-2"
-      onClick={() => setModalImageUrl(null)}
-    >
-      ✕
-    </button>
-  </div>
-)}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setModalImageUrl(null)}>
+          <Image
+            src={modalImageUrl}
+            alt="Preview"
+            width={800}
+            height={600}
+            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg border border-white object-contain"
+          />
+          <button
+            className="absolute top-6 right-6 text-white bg-black/50 hover:bg-black/80 rounded-full p-2"
+            onClick={() => setModalImageUrl(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Modern Sidebar */}
       <div className={`w-80 hidden lg:flex flex-col backdrop-blur-xl border-r transition-all duration-300 ${
@@ -283,7 +239,7 @@ const checkSessionStatus = async () => {
           <div className="flex items-center space-x-4">
             <div className="relative">
               <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg flex items-center justify-center">
-                <img src="cipher-logo.png" alt="" />
+                <Image src="/cipher-logo.png" alt="Cipher Logo" width={32} height={32} />
               </div>
               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
             </div>
@@ -337,6 +293,13 @@ const checkSessionStatus = async () => {
               </div>
             </div>
           </div>
+          {/* Debug buttons - you can uncomment these if needed */}
+          {/* 
+          <div className="mt-4 space-y-2">
+            <button onClick={handleSetName} className="w-full p-2 bg-blue-500 text-white rounded">Set Name</button>
+            <button onClick={checkSessionStatus} className="w-full p-2 bg-green-500 text-white rounded">Check Session</button>
+          </div>
+          */}
         </div>
       </div>
 
@@ -432,9 +395,7 @@ const checkSessionStatus = async () => {
                         : 'bg-gray-200'
                   }`}>
                     {message.isBot ? (
-                      
-                <img src="cipher-logo.png" alt="" />
-
+                      <Image src="/cipher-logo.png" alt="Cipher Logo" width={24} height={24} />
                     ) : (
                       <span className={`text-sm font-medium ${
                         isDarkMode ? 'text-gray-300' : 'text-gray-600'
@@ -494,28 +455,29 @@ const checkSessionStatus = async () => {
               </div>
             ))}
             
-                {showTemplates && (
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 px-8 py-6">
-    {[
-      "Apa fungsi Cipher?",
-      "Apa saja projek Pekan IT kali ini?",
-      "Siapa perancang program AI Assistant ini?",
-      "Bagaimana cara menggunakan Cipher?",
-    ].map((template, index) => (
-      <button
-        key={index}
-        onClick={() => handleTemplateClick(template)}
-        className={`p-6  cursor-pointer rounded-2xl text-sm font-semibold text-left shadow-md transition-all duration-200 ${
-          isDarkMode
-            ? 'bg-slate-800 text-white hover:bg-slate-700'
-            : 'bg-white text-gray-800 hover:bg-gray-100'
-        }`}
-      >
-        {template}
-      </button>
-    ))}
-  </div>
-)}
+            {showTemplates && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 px-8 py-6">
+                {[
+                  "Apa fungsi Cipher?",
+                  "Apa saja projek Pekan IT kali ini?",
+                  "Siapa perancang program AI Assistant ini?",
+                  "Bagaimana cara menggunakan Cipher?",
+                ].map((template, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleTemplateClick(template)}
+                    className={`p-6  cursor-pointer rounded-2xl text-sm font-semibold text-left shadow-md transition-all duration-200 ${
+                      isDarkMode
+                        ? 'bg-slate-800 text-white hover:bg-slate-700'
+                        : 'bg-white text-gray-800 hover:bg-gray-100'
+                    }`}
+                  >
+                    {template}
+                  </button>
+                ))}
+              </div>
+            )}
+            
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex justify-start animate-in slide-in-from-bottom duration-300">
