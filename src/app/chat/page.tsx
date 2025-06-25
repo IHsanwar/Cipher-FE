@@ -11,6 +11,12 @@ interface Message {
 
 export default function ChatAssistant() {
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+  const stripHtmlTags = (html: string): string => {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.textContent || div.innerText || "";
+};
+
 
     const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
       const target = e.target as HTMLImageElement;
@@ -20,7 +26,22 @@ export default function ChatAssistant() {
     };
 
     const router = useRouter();
+
+
   const [showTemplates, setShowTemplates] = useState(true);
+
+
+
+  const [surveyData, setSurveyData] = useState({
+  nama: "",
+  instansi: "",
+  tampilan_produk: "",
+  tampilan_stand: "",
+  penjelasan_produk: "",
+  hiburan: "",
+  kritik_saran: ""
+});
+
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [messages, setMessages] = useState<Message[]>([
@@ -39,6 +60,34 @@ export default function ChatAssistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+useEffect(() => {
+  const links = document.querySelectorAll('.chat-bubble a');
+  links.forEach(link => {
+    link.classList.add(
+      'inline-flex', 'items-center', 'gap-1',
+      'text-blue-500', 'hover:underline'
+    );
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+
+    // Tambahkan ikon eksternal
+    if (!link.querySelector('.external-icon')) {
+      const icon = document.createElement('span');
+      icon.innerHTML = `
+<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 3h7m0 0v7m0-7L10 14" />
+</svg>
+`;
+
+      icon.classList.add('external-icon', 'text-xs');
+      link.appendChild(icon);
+    }
+  });
+}, [messages]);
+
+
+
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -51,86 +100,147 @@ const handleTemplateClick = (text: string) => {
 
 
 
-  const handleSetName = async () => {
-    const username = prompt("Masukkan nama kamu:");
-    if (!username) return alert("Nama tidak boleh kosong!");
+  // Create a centralized API function with proper session handling
+const API_BASE = 'http://127.0.0.1:5000';
 
-    try {
-      const res = await fetch('http://localhost:5000/api/setname', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ username })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Gagal set nama');
-
-      const botMessage: Message = {
-        id: Date.now(),
-        text: data.message,
-        isBot: true,
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, botMessage]);
-    } catch (err: any) {
-      console.error(err);
-      alert(err.message || 'Terjadi kesalahan');
-    }
+const apiCall = async (endpoint: string, options: RequestInit = {}) => {
+  const defaultOptions: RequestInit = {
+    credentials: 'include', // Always include cookies/session
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers
+    },
+    ...options
   };
 
-  const handleSendMessage = async (messageText?: string) => {
-    const textToSend = messageText !== undefined ? messageText : inputMessage;
-    if (!textToSend.trim()) return;
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, defaultOptions);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error(`API call failed for ${endpoint}:`, error);
+    throw error;
+  }
+};
 
-    const userMessage: Message = {
+// Updated handleSendMessage function
+const handleSendMessage = async (messageText?: string) => {
+  const textToSend = messageText !== undefined ? messageText : inputMessage;
+  if (!textToSend.trim()) return;
+
+  const userMessage: Message = {
+    id: Date.now(),
+    text: textToSend,
+    isBot: false,
+    timestamp: new Date()
+  };
+
+  setMessages(prev => [...prev, userMessage]);
+  setInputMessage('');
+  setIsTyping(true);
+
+  try {
+    // Use the centralized API call function
+    const data = await apiCall('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message: textToSend })
+    });
+
+    const botMessage: Message = {
+      id: Date.now() + 1,
+      text: data.reply_html,
+      isBot: true,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, botMessage]);
+
+    // Debug session info
+    console.log("🔍 Session Debug:", data.debug);
+    console.log("📝 Bot reply content:", data.reply);
+
+    // Handle survey payload extraction
+    let extractedPayload: any = null;
+    const payloadMatch = data.reply.match(/```json([\s\S]*?)```/);
+    if (payloadMatch) {
+      const jsonRaw = payloadMatch[1].trim();
+      extractedPayload = JSON.parse(jsonRaw);
+
+      // Send survey data
+      await apiCall('/api/kirim-survey', {
+        method: 'POST',
+        body: JSON.stringify(extractedPayload)
+      });
+
+      console.log("✅ Survey data sent via payload block.");
+    }
+
+    // Alternative survey sending
+    if (data.reply.includes("#SEND_SURVEY:OK") && extractedPayload) {
+      await apiCall('/api/kirim-survey', {
+        method: 'POST',
+        body: JSON.stringify(extractedPayload)
+      });
+
+      console.log("✅ Survey data sent via #SEND_SURVEY:OK tag.");
+    }
+
+  } catch (err: any) {
+    console.error("❌ Error:", err);
+    setMessages(prev => [...prev, {
+      id: Date.now() + 2,
+      text: "⚠️ Error: " + (err.message || 'Terjadi kesalahan'),
+      isBot: true,
+      timestamp: new Date()
+    }]);
+  } finally {
+    setIsTyping(false);
+  }
+};
+
+// Updated handleSetName function
+const handleSetName = async () => {
+  const username = prompt("Masukkan nama kamu:");
+  if (!username) return alert("Nama tidak boleh kosong!");
+
+  try {
+    const data = await apiCall('/api/setname', {
+      method: 'POST',
+      body: JSON.stringify({ username })
+    });
+
+    const botMessage: Message = {
       id: Date.now(),
-      text: textToSend,
-      isBot: false,
+      text: data.message,
+      isBot: true,
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsTyping(true);
+    setMessages(prev => [...prev, botMessage]);
+  } catch (err: any) {
+    console.error(err);
+    alert(err.message || 'Terjadi kesalahan');
+  }
+};
 
-    try {
-      const res = await fetch('http://127.0.0.1:5000/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ message: textToSend })
-      });
+// Add a debug function to check session status
+const checkSessionStatus = async () => {
+  try {
+    const data = await apiCall('/api/session-debug');
+    console.log("🔍 Session Status:", data);
+    alert(`Session ID: ${data.session_id}\nHistory: ${data.history_length} messages\nUsername: ${data.username}`);
+  } catch (err: any) {
+    console.error("Session check failed:", err);
+  }
+};
 
-      const data = await res.json();
+// Add this button to your component for debugging
+//
 
-      if (!res.ok) throw new Error(data.error || 'Gagal dapat balasan');
-
-      const botMessage: Message = {
-        id: Date.now() + 1,
-        text: data.reply_html,
-        isBot: true,
-        timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, botMessage]);
-    } catch (err: any) {
-      console.error(err);
-      setMessages(prev => [...prev, {
-        id: Date.now() + 2,
-        text: "⚠️ Error: " + (err.message || 'Terjadi kesalahan'),
-        isBot: true,
-        timestamp: new Date()
-      }]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -186,7 +296,7 @@ const handleTemplateClick = (text: string) => {
               <p className={`text-sm transition-colors ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                Cifera 0.5.0
+                Cifera 0.7.2
               </p>
             </div>
           </div>
@@ -201,29 +311,9 @@ const handleTemplateClick = (text: string) => {
               </svg>
               <span>Chat</span>
             </button>
-            <button onClick={handleSetName} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
-              isDarkMode 
-                ? 'text-gray-400 hover:text-gray-300 hover:bg-slate-800' 
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-            }`}>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-              </svg>
-              <span>Set Name</span>
-            </button>
-            <button className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
-              isDarkMode 
-                ? 'text-gray-400 hover:text-gray-300 hover:bg-slate-800' 
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-            }`}>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-              </svg>
-              <span>Settings</span>
-            </button>
+            
           </div>
         </div>
-
         {/* Bottom Section */}
         <div className="p-6">
           <div className={`p-4 rounded-2xl backdrop-blur-sm ${
@@ -363,7 +453,7 @@ const handleTemplateClick = (text: string) => {
                               : 'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg hover:shadow-xl'
                           }`}>
                             <div
-                            className={`
+                            className={` chat-bubble
                               prose prose-sm max-w-none leading-relaxed
                               relative group
                               [&_img]:cursor-zoom-in
@@ -387,6 +477,7 @@ const handleTemplateClick = (text: string) => {
                             dangerouslySetInnerHTML={{ __html: message.text }}
                             onClick={handleImageClick}
                           />
+                    
 
                     <div className={`text-xs mt-2 ${
                       message.isBot
@@ -508,8 +599,7 @@ const handleTemplateClick = (text: string) => {
               </div>
 
               {/* Send Button */}
-              <button onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isTyping}
+              <button onClick={() => handleSendMessage()} disabled={!inputMessage.trim() || isTyping}
                 className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-2xl hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
               >
                 <svg className="w-6 h-6 mx-auto" fill="currentColor" viewBox="0 0 20 20">
