@@ -156,11 +156,11 @@ const SearchSection = ({ isDark }: SearchSectionProps) => {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
 
   const placeholders = [
-    'Jelaskan konsep OOP dalam Java...',
-    'Cara membuat responsive design?',
-    'Apa itu database normalization?',
-    'Bagaimana algoritma sorting bekerja?',
-    'Explain REST API untuk pemula...'
+    'Bagaimana cara mengambil nomor antrian raport?',
+    'Berikan Denah Pekan IT 2025...',
+    'Apa saja project Pekan IT Divisi RPL?',
+    'Apa fitur unggulan Chipher?',
+    'Siapa saja guru-guru yang ada di SMK Plus Pelita Nusantara?',
   ];
 
   useEffect(() => {
@@ -284,7 +284,7 @@ const HeroSection = ( ({ isDark }: SearchSectionProps ) => {
         }`}>
           Mau tahu apa aja yang seru di Pekan IT SMK Plus Pelita Nusantara?
           <br className="hidden md:block" />
-          Tanya aja ke <span className="relative inline-block text-red-500 font-semibold">Cipher Assistant AI</span> — asisten digital yang siap bantu kamu cari info acara, lokasi, dan semua yang kamu butuhkan. Praktis dan cepat!
+          Tanya aja ke <span className="relative inline-block text-red-500 font-semibold">Cipher Assistant AI</span> — Asisten digital yang siap bantu kamu cari info acara, lokasi, dan semua yang kamu butuhkan selama Pekan IT berlangsung. Sangat praktis dan cepat!
         </p>
 
           {/* CTA Buttons */}
@@ -358,7 +358,7 @@ const FeaturesSection = ({ isDark }: SearchSectionProps) => {
           <p className={`text-xl max-w-3xl mx-auto transition-colors ${
             isDark ? 'text-gray-300' : 'text-gray-600'
           }`}>
-            Dibangun khusus untuk siswa Indonesia, Cipher Assistant AI memahami kebutuhan pelajar dan siap membantu kamu menelusuri semua informasi di Pekan IT SMK Plus Pelita Nusantara.
+            Dibangun khusus untuk Siswa Indonesia, Cipher AI Assistant memahami kebutuhan pelajar dan siap membantu kamu menelusuri semua informasi di Pekan IT SMK Plus Pelita Nusantara.
           </p>
         </div>
         
