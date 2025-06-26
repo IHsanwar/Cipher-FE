@@ -159,7 +159,7 @@ const SearchSection = ({ isDark }: SearchSectionProps) => {
     'Bagaimana cara mengambil nomor antrian raport?',
     'Berikan Denah Pekan IT 2025...',
     'Apa saja project Pekan IT Divisi RPL?',
-    'Apa fitur unggulan Chipher?',
+    'Apa fitur unggulan Cipher?',
     'Siapa saja guru-guru yang ada di SMK Plus Pelita Nusantara?',
   ];
 
