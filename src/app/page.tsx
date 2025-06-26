@@ -156,11 +156,11 @@ const SearchSection = ({ isDark }: SearchSectionProps) => {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
 
   const placeholders = [
-    'Jelaskan konsep OOP dalam Java...',
-    'Cara membuat responsive design?',
-    'Apa itu database normalization?',
-    'Bagaimana algoritma sorting bekerja?',
-    'Explain REST API untuk pemula...'
+    'Bagaimana cara mengambil nomor antrian raport?',
+    'Berikan Denah Pekan IT 2025...',
+    'Apa saja project Pekan IT Divisi RPL?',
+    'Apa fitur unggulan Chipher?',
+    'Siapa saja guru-guru yang ada di SMK Plus Pelita Nusantara?',
   ];
 
   useEffect(() => {
