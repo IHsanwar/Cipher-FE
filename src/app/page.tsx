@@ -14,39 +14,16 @@ import {
   Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
-// Types
-interface NavigationProps {
+
+
+type NavigationProps = {
   isDark: boolean;
   toggleTheme: () => void;
-}
+};
 
-interface SearchSectionProps {
-  isDark: boolean;
-}
-
-interface HeroSectionProps {
-  isDark: boolean;
-}
-
-interface FeatureProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  isDark: boolean;
-}
-
-interface FeaturesSectionProps {
-  isDark: boolean;
-}
-
-interface FooterProps {
-  isDark: boolean;
-}
-
-// Navigation Component
-const Navigation: React.FC<NavigationProps> = ({ isDark, toggleTheme }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const [isScrolled, setIsScrolled] = useState<boolean>(false);
+const Navigation = ({ isDark, toggleTheme }: NavigationProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const handleScroll = useCallback(() => {
     setIsScrolled(window.scrollY > 20);
@@ -56,10 +33,6 @@ const Navigation: React.FC<NavigationProps> = ({ isDark, toggleTheme }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
-
-  const handleMenuToggle = useCallback(() => {
-    setIsMenuOpen(prev => !prev);
-  }, []);
 
   const menuItems = ['Fitur', 'Demo', 'Tutorial', 'Kontak'];
 
@@ -128,13 +101,13 @@ const Navigation: React.FC<NavigationProps> = ({ isDark, toggleTheme }) => {
                 <Moon className="w-5 h-5 transform group-hover:rotate-12 transition-transform duration-300" />
               )}
             </button>
-            <button className="hidden md:block relative px-6 py-2.5 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden group">
+            <Link href="/chat" className="hidden md:block relative px-6 py-2.5 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden group">
               <span className="relative z-10">Coba Gratis</span>
               <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-700 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </button>
+            </Link>
             <button 
               className="md:hidden p-2 rounded-lg transition-all duration-300"
-              onClick={handleMenuToggle}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
@@ -165,9 +138,9 @@ const Navigation: React.FC<NavigationProps> = ({ isDark, toggleTheme }) => {
                   {item}
                 </a>
               ))}
-              <button className="mt-4 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <Link href="/chat" className="mt-4 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-center">
                 Coba Gratis
-              </button>
+              </Link>
             </div>
           </div>
         )}
@@ -175,33 +148,12 @@ const Navigation: React.FC<NavigationProps> = ({ isDark, toggleTheme }) => {
     </nav>
   );
 };
-
-// Animated Background
-const AnimatedBackground: React.FC<{ isDark: boolean }> = ({ isDark }) => {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* Floating particles */}
-      <div className="absolute top-20 left-10 w-2 h-2 bg-red-400 rounded-full animate-pulse opacity-60"></div>
-      <div className="absolute top-40 right-20 w-1 h-1 bg-red-500 rounded-full animate-ping opacity-40"></div>
-      <div className="absolute bottom-40 left-20 w-3 h-3 bg-red-300 rounded-full animate-pulse opacity-30"></div>
-      <div className="absolute bottom-20 right-10 w-1 h-1 bg-red-600 rounded-full animate-ping opacity-50"></div>
-      
-      {/* Gradient orbs */}
-      <div className={`absolute top-1/4 -left-20 w-40 h-40 rounded-full blur-3xl opacity-20 animate-pulse ${
-        isDark ? 'bg-red-500' : 'bg-red-400'
-      }`}></div>
-      <div className={`absolute bottom-1/4 -right-20 w-60 h-60 rounded-full blur-3xl opacity-15 animate-pulse ${
-        isDark ? 'bg-red-600' : 'bg-red-300'
-      }`}></div>
-    </div>
-  );
+export type SearchSectionProps = {
+  isDark: boolean;
 };
-
-// Search Component
-const SearchSection: React.FC<SearchSectionProps> = ({ isDark }) => {
-  const [query, setQuery] = useState<string>('');
-  const [currentPlaceholder, setCurrentPlaceholder] = useState<number>(0);
-  const [isTyping, setIsTyping] = useState<boolean>(false);
+const SearchSection = ({ isDark }: SearchSectionProps) => {
+  const [query, setQuery] = useState('');
+  const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
 
   const placeholders = [
     'Jelaskan konsep OOP dalam Java...',
@@ -216,16 +168,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({ isDark }) => {
       setCurrentPlaceholder((prev) => (prev + 1) % placeholders.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, [placeholders.length]);
-
-  const handleQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value);
-    setIsTyping(e.target.value.length > 0);
   }, []);
-
-  const handleSubmit = useCallback(() => {
-    console.log('Search query:', query);
-  }, [query]);
 
   return (
     <div className="max-w-3xl mx-auto relative">
@@ -235,23 +178,19 @@ const SearchSection: React.FC<SearchSectionProps> = ({ isDark }) => {
           <input
             type="text"
             value={query}
-            onChange={handleQueryChange}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholders[currentPlaceholder]}
-            className={`w-full px-6 py-5 text-lg rounded-2xl focus:outline-none focus:ring-2 focus:ring-red-500/30 transition-all duration-500 backdrop-blur-xl border-2 shadow-2xl ${
+            className={`w-full px-6 py-5 text-lg rounded-2xl focus:outline-none focus:ring-2 focus:ring-red-500/30 transition-all duration-500 backdrop-blur-xl border-2 shadow-2xl pr-20 ${
               isDark 
                 ? 'bg-slate-800/90 border-slate-700/50 text-white placeholder-gray-400 focus:bg-slate-800/95' 
                 : 'bg-white/90 border-gray-200/50 text-gray-900 placeholder-gray-500 focus:bg-white/95'
-            } ${isTyping ? 'pr-20' : 'pr-32'}`}
+            }`}
           />
           
-          <Link href="/chat">
-          <button 
-            className="absolute right-3 top-3 bottom-3 px-6 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white rounded-xl hover:from-red-600 hover:to-red-800 transition-all duration-300 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 group/btn"
-          >
+          <Link href="/chat" className="absolute right-3 top-3 bottom-3 px-6 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white rounded-xl hover:from-red-600 hover:to-red-800 transition-all duration-300 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 group/btn">
             <Send className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300" />
             <span className="hidden sm:block">Tanya</span>
-          </button>
-        </Link>
+          </Link>
         </div>
       </div>
     </div>
@@ -259,8 +198,8 @@ const SearchSection: React.FC<SearchSectionProps> = ({ isDark }) => {
 };
 
 // Hero Section
-const HeroSection: React.FC<HeroSectionProps> = ({ isDark }) => {
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+const HeroSection = ( ({ isDark }: SearchSectionProps ) => {
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
@@ -272,7 +211,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({ isDark }) => {
         ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900' 
         : 'bg-gradient-to-br from-gray-50 via-white to-gray-50'
     }`}>
-      <AnimatedBackground isDark={isDark} />
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 left-10 w-2 h-2 bg-red-400 rounded-full animate-pulse opacity-60"></div>
+        <div className="absolute top-40 right-20 w-1 h-1 bg-red-500 rounded-full animate-ping opacity-40"></div>
+        <div className="absolute bottom-40 left-20 w-3 h-3 bg-red-300 rounded-full animate-pulse opacity-30"></div>
+        <div className="absolute bottom-20 right-10 w-1 h-1 bg-red-600 rounded-full animate-ping opacity-50"></div>
+        
+        <div className={`absolute top-1/4 -left-20 w-40 h-40 rounded-full blur-3xl opacity-20 animate-pulse ${
+          isDark ? 'bg-red-500' : 'bg-red-400'
+        }`}></div>
+        <div className={`absolute bottom-1/4 -right-20 w-60 h-60 rounded-full blur-3xl opacity-15 animate-pulse ${
+          isDark ? 'bg-red-600' : 'bg-red-300'
+        }`}></div>
+      </div>
       
       <div className="max-w-7xl mx-auto text-center relative z-10">
         {/* Badge */}
@@ -335,72 +287,26 @@ const HeroSection: React.FC<HeroSectionProps> = ({ isDark }) => {
           Tanya aja ke <span className="relative inline-block text-red-500 font-semibold">Cipher Assistant AI</span> — asisten digital yang siap bantu kamu cari info acara, lokasi, dan semua yang kamu butuhkan. Praktis dan cepat!
         </p>
 
-
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-          <Link href="/chat">
-          <button className="group relative px-8 py-4 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white rounded-2xl text-lg font-semibold flex items-center gap-3 justify-center shadow-2xl hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105 overflow-hidden">
+          <Link href="/chat" className="group relative px-8 py-4 bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white rounded-2xl text-lg font-semibold flex items-center gap-3 justify-center shadow-2xl hover:shadow-red-500/25 transition-all duration-300 transform hover:scale-105 overflow-hidden">
             <span className="relative z-10 flex items-center gap-3">
               <GraduationCap className="w-6 h-6" />
               Mulai Bertanya
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-700 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
-        </Link>
+          </Link>
           </div>
         </div>
       </div>
     </section>
   );
-};
+});
 
-// Feature Card
-const FeatureCard: React.FC<FeatureProps> = ({ icon, title, description, isDark }) => {
-  const [isHovered, setIsHovered] = useState<boolean>(false);
-
-  return (
-    <div 
-      className={`group relative p-8 rounded-2xl border transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 backdrop-blur-xl overflow-hidden ${
-        isDark 
-          ? 'bg-slate-800/60 border-slate-700/30 hover:bg-slate-800/80 hover:border-slate-600/50' 
-          : 'bg-white/80 border-gray-200/30 hover:bg-white/90 hover:border-gray-300/50'
-      }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Gradient background on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-red-600/5 to-red-700/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      
-      <div className="relative z-10">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 ${
-          isHovered 
-            ? 'bg-gradient-to-br from-red-500 to-red-600 text-white transform scale-110' 
-            : isDark 
-              ? 'bg-red-500/20 text-red-400' 
-              : 'bg-red-50 text-red-500'
-        }`}>
-          {icon}
-        </div>
-        
-        <h3 className={`text-xl font-bold mb-4 transition-colors ${
-          isDark ? 'text-white group-hover:text-red-300' : 'text-gray-900 group-hover:text-red-600'
-        }`}>
-          {title}
-        </h3>
-        
-        <p className={`leading-relaxed transition-colors ${
-          isDark ? 'text-gray-300' : 'text-gray-600'
-        }`}>
-          {description}
-        </p>
-      </div>
-    </div>
-  );
-};
 
 // Features Section
-const FeaturesSection: React.FC<FeaturesSectionProps> = ({ isDark }) => {
-  const features: Omit<FeatureProps, 'isDark'>[] = [
+const FeaturesSection = ({ isDark }: SearchSectionProps) => {
+  const features = [
     {
       icon: <Code className="w-7 h-7" />,
       title: "Code Assistant",
@@ -424,7 +330,6 @@ const FeaturesSection: React.FC<FeaturesSectionProps> = ({ isDark }) => {
         ? 'bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800' 
         : 'bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50'
     }`}>
-      {/* Background decoration */}
       <div className="absolute top-0 left-0 w-full h-full">
         <div className={`absolute top-20 left-10 w-32 h-32 rounded-full blur-3xl opacity-10 ${
           isDark ? 'bg-red-500' : 'bg-red-400'
@@ -457,18 +362,13 @@ const FeaturesSection: React.FC<FeaturesSectionProps> = ({ isDark }) => {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <FeatureCard key={`feature-${index}`} {...feature} isDark={isDark} />
-          ))}
-        </div>
       </div>
     </section>
   );
 };
 
 // Footer
-const Footer: React.FC<FooterProps> = ({ isDark }) => {
+const Footer = (({ isDark }: SearchSectionProps ) => {
   const footerLinks = [
     { name: 'Privacy', href: '#' },
     { name: 'Terms', href: '#' },
@@ -530,11 +430,11 @@ const Footer: React.FC<FooterProps> = ({ isDark }) => {
       </div>
     </footer>
   );
-};
+});
 
 // Main Component
-const CipherLandingPage: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+const CipherLandingPage = () => {
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   const toggleTheme = useCallback(() => {
     setIsDarkMode(prev => !prev);

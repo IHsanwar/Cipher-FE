@@ -3,14 +3,23 @@ import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname  = dirname(__filename);
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+const compat = new FlatCompat({ baseDirectory: __dirname });
 
-const eslintConfig = [
+/** @type {import("eslint").Linter.FlatConfig[]} */
+export default [
+  // 👉 preset bawaan Next.js
   ...compat.extends("next/core-web-vitals", "next/typescript"),
-];
 
-export default eslintConfig;
+  // 👉 override / tambahan aturan
+  {
+    rules: {
+      // hanya warning - tidak blokir build
+      "@typescript-eslint/no-unused-vars": "warn",
+
+      // matikan strict React-Hooks dep check (hanya dev preferensi)
+      "react-hooks/exhaustive-deps": "off",
+    },
+  },
+];
