@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { 
   Sun, 
   Moon, 
@@ -14,6 +15,14 @@ import {
   Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
+
+import { Poppins } from "next/font/google";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "600"], // pilih sesuai kebutuhan
+  variable: "--font-poppins", // bisa juga langsung pakai className
+});
 
 
 type NavigationProps = {
@@ -49,9 +58,9 @@ const Navigation = ({ isDark, toggleTheme }: NavigationProps) => {
           {/* Logo */}
           <div className="flex items-center space-x-3">
             <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-all duration-300">
-                <span className="text-white font-bold text-lg">C</span>
-              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg flex items-center justify-center">
+                      <Image src="/cipher-logo.png" alt="Cipher Logo" width={80} height={80} />
+                    </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
             </div>
             <div className="flex flex-col">
@@ -156,11 +165,11 @@ const SearchSection = ({ isDark }: SearchSectionProps) => {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
 
   const placeholders = [
-    'Jelaskan konsep OOP dalam Java...',
-    'Cara membuat responsive design?',
-    'Apa itu database normalization?',
-    'Bagaimana algoritma sorting bekerja?',
-    'Explain REST API untuk pemula...'
+    'Bagaimana cara mengambil nomor antrian raport?',
+    'Berikan Denah Pekan IT 2025...',
+    'Apa saja project Pekan IT Divisi RPL?',
+    'Apa fitur unggulan Cipher?',
+    'Siapa saja guru-guru yang ada di SMK Plus Pelita Nusantara?',
   ];
 
   useEffect(() => {
@@ -241,7 +250,7 @@ const HeroSection = ( ({ isDark }: SearchSectionProps ) => {
               <Sparkles className="w-4 h-4 opacity-75" />
             </div>
           </div>
-          <span>🎓 PEKAN IT 2025</span>
+          <span> PEKAN IT 2025</span>
         </div>
 
         {/* Title */}
@@ -257,13 +266,13 @@ const HeroSection = ( ({ isDark }: SearchSectionProps ) => {
               </span>
             </span>
           </h1>
-          <p className={`text-xl md:text-2xl lg:text-3xl font-semibold mb-4 transition-colors ${
+          <p className={`text-xl md:text-2xl lg:text-3xl font-semibold mb-10 transition-colors ${
             isDark ? 'text-gray-300' : 'text-gray-600'
           }`}>
-            AI Assistant Khusus{' '}
+            AI Assistant for{' '}
             <span className="relative inline-block">
               <span className="text-red-500">Pekan IT</span>
-              <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-red-500 to-red-600"></div>
+             
             </span>
           </p>
         </div>
@@ -344,7 +353,7 @@ const FeaturesSection = ({ isDark }: SearchSectionProps) => {
           <h2 className={`text-4xl md:text-5xl font-black mb-6 transition-colors ${
             isDark ? 'text-white' : 'text-gray-900'
           }`}>
-            Kenapa Pilih{' '}
+            Apa itu{' '}
             <span className="relative inline-block">
               <span className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 bg-clip-text text-transparent">
                 Cipher
@@ -358,7 +367,7 @@ const FeaturesSection = ({ isDark }: SearchSectionProps) => {
           <p className={`text-xl max-w-3xl mx-auto transition-colors ${
             isDark ? 'text-gray-300' : 'text-gray-600'
           }`}>
-            Dibangun khusus untuk siswa Indonesia, Cipher Assistant AI memahami kebutuhan pelajar dan siap membantu kamu menelusuri semua informasi di Pekan IT SMK Plus Pelita Nusantara.
+            Asisten AI di Pekan IT Devaccto RPL yang membantu menjawab pertanyaan tentang event, memberikan penjelasan tentang projek yang ditampilkan, dan memberikan panduan mengenai pengambilan nomor antrian raport.
           </p>
         </div>
         
@@ -384,9 +393,9 @@ const Footer = (({ isDark }: SearchSectionProps ) => {
       <div className="max-w-7xl mx-auto text-center">
         <div className="flex items-center justify-center space-x-4 mb-6">
           <div className="relative">
-            <div className="w-12 h-12 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">C</span>
-            </div>
+            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg flex items-center justify-center">
+                            <Image src="/cipher-logo.png" alt="Cipher Logo" width={80} height={80} />
+                          </div>
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-400 rounded-full animate-pulse"></div>
           </div>
           <div className="flex flex-col items-start">
@@ -425,7 +434,7 @@ const Footer = (({ isDark }: SearchSectionProps ) => {
         <div className={`text-sm transition-colors ${
           isDark ? 'text-gray-400' : 'text-gray-500'
         }`}>
-          © 2025 Cipher. Made with ❤️ for Participant Pekan IT.
+          © 2025 Cipher.
         </div>
       </div>
     </footer>
@@ -434,7 +443,7 @@ const Footer = (({ isDark }: SearchSectionProps ) => {
 
 // Main Component
 const CipherLandingPage = () => {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleTheme = useCallback(() => {
     setIsDarkMode(prev => !prev);

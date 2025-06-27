@@ -38,7 +38,7 @@ export default function ChatAssistant() {
 
   const [showTemplates, setShowTemplates] = useState(true);
 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -239,7 +239,7 @@ export default function ChatAssistant() {
           <div className="flex items-center space-x-4">
             <div className="relative">
               <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg flex items-center justify-center">
-                <Image src="/cipher-logo.png" alt="Cipher Logo" width={32} height={32} />
+                <Image src="/cipher-logo.png" alt="Cipher Logo" width={80} height={80} />
               </div>
               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
             </div>
@@ -252,7 +252,7 @@ export default function ChatAssistant() {
               <p className={`text-sm transition-colors ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                Cifera 0.7.2
+                Cifera 0.8.1
               </p>
             </div>
           </div>
@@ -395,7 +395,7 @@ export default function ChatAssistant() {
                         : 'bg-gray-200'
                   }`}>
                     {message.isBot ? (
-                      <Image src="/cipher-logo.png" alt="Cipher Logo" width={24} height={24} />
+                      <Image src="/cipher-logo.png" alt="Cipher Logo" width={80} height={80} />
                     ) : (
                       <span className={`text-sm font-medium ${
                         isDarkMode ? 'text-gray-300' : 'text-gray-600'
