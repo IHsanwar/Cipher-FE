@@ -36,6 +36,25 @@ export default function ChatAssistant() {
     }
   };
 
+
+  
+  const handleClearChat = async () => {
+  try {
+    // panggil backend untuk hapus sesi
+    await fetch("http://127.0.0.1:5000/api/clear-session", {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (err) {
+    console.error("Failed to clear session:", err);
+  } finally {
+    // bersihkan state lokal ⇒ tidak lagi append pesan lama
+    setMessages([]);          // kosongkan array message
+    setShowTemplates(true);   // kalau ingin tampilkan template awal lagi
+  }
+};
+
+
   const [showTemplates, setShowTemplates] = useState(true);
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
@@ -142,7 +161,7 @@ export default function ChatAssistant() {
   };
 
   // Create a centralized API function with proper session handling
-  const API_BASE = 'https://cipher.ihsanwd10.my.id';
+  const API_BASE = 'http://127.0.0.1:5000';
 
   const apiCall = async (endpoint: string, options: RequestInit = {}) => {
     const defaultOptions: RequestInit = {
@@ -557,39 +576,20 @@ export default function ChatAssistant() {
               {/* Quick Actions */}
               <div className="flex space-x-2">
               <button
-                    onClick={async () => {
-                      try {
-                        await fetch("https://cipher.ihsanwd10.my.id/api/clear-session", {
-                          method: "POST",
-                          credentials: "include"
-                        });
-                      } catch (error) {
-                        console.error("Failed to clear session:", error);
-                      } finally {
-                        window.location.reload();
-                      }
-                    }}
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
-                      isDarkMode 
-                        ? 'bg-slate-800 text-gray-300 hover:bg-slate-700 hover:text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
-                    }`}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                      />
-                    </svg>
-                  </button>
+  onClick={handleClearChat}
+  className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+    isDarkMode
+      ? "bg-slate-800 text-gray-300 hover:bg-slate-700 hover:text-white"
+      : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
+  }`}
+  title="Clear chat"
+>
+  {/* icon sederhana refresh/rotate */}
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M4 4v6h6M20 20v-6h-6M5 19A9 9 0 0019 5M19 19A9 9 0 005 5" />
+  </svg>
+</button>
 
 
               </div>
