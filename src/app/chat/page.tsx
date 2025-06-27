@@ -50,9 +50,42 @@ export default function ChatAssistant() {
   const [inputMessage, setInputMessage] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Auto-resize textarea function
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      
+      // Calculate the new height based on content
+      const scrollHeight = textarea.scrollHeight;
+      const minHeight = 56; // Minimum height (same as original)
+      const maxHeight = 200; // Maximum height before scrolling
+      
+      // Set the height, but constrain it between min and max
+      const newHeight = Math.max(minHeight, Math.min(scrollHeight, maxHeight));
+      textarea.style.height = `${newHeight}px`;
+      
+      // Enable/disable scrolling based on content
+      if (scrollHeight > maxHeight) {
+        textarea.style.overflowY = 'auto';
+      } else {
+        textarea.style.overflowY = 'hidden';
+      }
+    }
+  };
+
+  // Handle input change with auto-resize
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputMessage(e.target.value);
+    // Delay the resize to ensure the DOM is updated
+    setTimeout(adjustTextareaHeight, 0);
   };
 
   useEffect(() => {
@@ -83,6 +116,13 @@ export default function ChatAssistant() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Reset textarea height when input is cleared
+  useEffect(() => {
+    if (inputMessage === '') {
+      adjustTextareaHeight();
+    }
+  }, [inputMessage]);
 
   const handleTemplateClick = (text: string) => {
     setShowTemplates(false); // sembunyikan setelah klik
@@ -132,6 +172,9 @@ export default function ChatAssistant() {
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsTyping(true);
+
+    // Reset textarea height after clearing input
+    setTimeout(adjustTextareaHeight, 0);
 
     try {
       // Use the centralized API call function
@@ -191,10 +234,6 @@ export default function ChatAssistant() {
       setIsTyping(false);
     }
   };
-
-
-  // Add a debug function to check session status
-  
 
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -293,13 +332,6 @@ export default function ChatAssistant() {
               </div>
             </div>
           </div>
-          {/* Debug buttons - you can uncomment these if needed */}
-          {/* 
-          <div className="mt-4 space-y-2">
-            <button onClick={handleSetName} className="w-full p-2 bg-blue-500 text-white rounded">Set Name</button>
-            <button onClick={checkSessionStatus} className="w-full p-2 bg-green-500 text-white rounded">Check Session</button>
-          </div>
-          */}
         </div>
       </div>
 
@@ -543,8 +575,9 @@ export default function ChatAssistant() {
               {/* Input Field */}
               <div className="flex-1 relative">
                 <textarea
+                  ref={textareaRef}
                   value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Type your message here..."
                   rows={1}
@@ -555,7 +588,8 @@ export default function ChatAssistant() {
                   }`}
                   style={{
                     minHeight: '56px',
-                    maxHeight: '120px'
+                    height: '56px', // Default height
+                    lineHeight: '1.5'
                   }}
                 />
               </div>
