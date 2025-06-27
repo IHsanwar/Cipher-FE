@@ -14,12 +14,10 @@ export default [
 
   // 👉 override / tambahan aturan
   {
-    rules: {
-      // hanya warning - tidak blokir build
-      "@typescript-eslint/no-unused-vars": "warn",
-
-      // matikan strict React-Hooks dep check (hanya dev preferensi)
-      "react-hooks/exhaustive-deps": "off",
-    },
-  },
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "next/next/no-img-element": "off"
+  }
+}
 ];

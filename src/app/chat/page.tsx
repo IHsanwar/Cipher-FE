@@ -89,7 +89,7 @@ export default function ChatAssistant() {
   useEffect(() => {
     const handleUnload = () => {
       navigator.sendBeacon(
-        "http://localhost:5000/api/clear-session",
+        "http://cipher.ihsanwd10.my.id/api/clear-session",
         ""
       );
     };
@@ -142,7 +142,7 @@ export default function ChatAssistant() {
   };
 
   // Create a centralized API function with proper session handling
-  const API_BASE = 'http://localhost:5000/';
+  const API_BASE = 'https://cipher.ihsanwd10.my.id';
 
   const apiCall = async (endpoint: string, options: RequestInit = {}) => {
     const defaultOptions: RequestInit = {
@@ -173,7 +173,7 @@ export default function ChatAssistant() {
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText !== undefined ? messageText : inputMessage;
     if (!textToSend.trim()) return;
-
+    if (showTemplates) setShowTemplates(false);
     const userMessage: Message = {
       id: Date.now(),
       text: textToSend,
@@ -303,7 +303,7 @@ export default function ChatAssistant() {
               <p className={`text-sm transition-colors ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                Cifera 0.8.1
+                Cifera 1.0.0
               </p>
             </div>
           </div>
@@ -556,38 +556,42 @@ export default function ChatAssistant() {
             <div className="flex items-end space-x-4">
               {/* Quick Actions */}
               <div className="flex space-x-2">
-               <button
-                  onClick={() => window.location.reload()}
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
-                    isDarkMode 
-                      ? 'bg-slate-800 text-gray-300 hover:bg-slate-700 hover:text-white' 
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
-                  }`}
-                >
-                <svg
-                width={20}
-                height={20}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                className={`${false ? 'animate-spin' : ''} ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
-                             >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
+              <button
+                    onClick={async () => {
+                      try {
+                        await fetch("https://cipher.ihsanwd10.my.id/api/clear-session", {
+                          method: "POST",
+                          credentials: "include"
+                        });
+                      } catch (error) {
+                        console.error("Failed to clear session:", error);
+                      } finally {
+                        window.location.reload();
+                      }
+                    }}
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+                      isDarkMode 
+                        ? 'bg-slate-800 text-gray-300 hover:bg-slate-700 hover:text-white' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+                    }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                  </button>
 
-      </button>
 
-                <button
-  onClick={() => fetch("http://localhost:5000/api/clear-session", { method: "POST", credentials: "include" })}
-  className="text-sm text-red-500"
->
-  Clear Chat
-</button>
               </div>
                 
               {/* Input Field */}
