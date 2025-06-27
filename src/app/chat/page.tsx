@@ -84,9 +84,21 @@ export default function ChatAssistant() {
   // Handle input change with auto-resize
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(e.target.value);
-    // Delay the resize to ensure the DOM is updated
     setTimeout(adjustTextareaHeight, 0);
   };
+  useEffect(() => {
+    const handleUnload = () => {
+      navigator.sendBeacon(
+        "http://localhost:5000/api/clear-session",
+        ""
+      );
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, []);
+
 
   useEffect(() => {
     const links = document.querySelectorAll('.chat-bubble a');
@@ -130,7 +142,7 @@ export default function ChatAssistant() {
   };
 
   // Create a centralized API function with proper session handling
-  const API_BASE = 'https://cipher.ihsanwd10.my.id';
+  const API_BASE = 'http://localhost:5000/';
 
   const apiCall = async (endpoint: string, options: RequestInit = {}) => {
     const defaultOptions: RequestInit = {
@@ -569,7 +581,13 @@ export default function ChatAssistant() {
               </svg>
 
       </button>
-                
+
+                <button
+  onClick={() => fetch("http://localhost:5000/api/clear-session", { method: "POST", credentials: "include" })}
+  className="text-sm text-red-500"
+>
+  Clear Chat
+</button>
               </div>
                 
               {/* Input Field */}
