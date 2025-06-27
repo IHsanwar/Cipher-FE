@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface Message {
   id: number;
@@ -405,6 +406,7 @@ export default function ChatAssistant() {
 
             {/* Right Controls */}
             <div className="flex items-center space-x-3">
+              <Link href="/">
               <button className={`p-3 rounded-2xl transition-all duration-200 ${
                 isDarkMode 
                   ? 'bg-slate-800 text-gray-300 hover:bg-slate-700 hover:text-white' 
@@ -414,6 +416,7 @@ export default function ChatAssistant() {
                   <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
                 </svg>
               </button>
+              </Link>
 
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
