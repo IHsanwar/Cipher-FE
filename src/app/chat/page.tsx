@@ -42,7 +42,7 @@ export default function ChatAssistant() {
   const handleClearChat = async () => {
   try {
     // panggil backend untuk hapus sesi
-    await fetch("http://cipher.ihsanwd10.my.id/api/clear-session", {
+    await fetch("http://127.0.0.1:5000/api/clear-session", {
       method: "POST",
       credentials: "include",
     });
@@ -109,7 +109,7 @@ export default function ChatAssistant() {
   useEffect(() => {
     const handleUnload = () => {
       navigator.sendBeacon(
-        "http://cipher.ihsanwd10.my.id/api/clear-session",
+        "http://127.0.0.1:5000/api/clear-session",
         ""
       );
     };
@@ -162,7 +162,7 @@ export default function ChatAssistant() {
   };
 
   // Create a centralized API function with proper session handling
-  const API_BASE = 'http://cipher.ihsanwd10.my.id';
+  const API_BASE = 'http://127.0.0.1:5000';
 
   const apiCall = async (endpoint: string, options: RequestInit = {}) => {
     const defaultOptions: RequestInit = {
