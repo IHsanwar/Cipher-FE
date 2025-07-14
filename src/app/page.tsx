@@ -76,11 +76,11 @@ const Navigation = ({ isDark, toggleTheme }: NavigationProps) => {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
+                
             {menuItems.map((item) => (
               <a
                 key={item}
-                href="#"
+                href={`/${item.toLowerCase()}`} // => "/fitur", "/demo", dll
                 className={`relative transition-all duration-300 font-medium group ${
                   isDark 
                     ? 'text-gray-300 hover:text-white' 
@@ -91,7 +91,6 @@ const Navigation = ({ isDark, toggleTheme }: NavigationProps) => {
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-red-500 to-red-600 transition-all duration-300 group-hover:w-full"></span>
               </a>
             ))}
-          </div>
 
           {/* Actions */}
           <div className="flex items-center space-x-3">
