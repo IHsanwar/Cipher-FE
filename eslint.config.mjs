@@ -9,10 +9,8 @@ const compat = new FlatCompat({ baseDirectory: __dirname });
 
 /** @type {import("eslint").Linter.FlatConfig[]} */
 export default [
-  // 👉 preset bawaan Next.js
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 
-  // 👉 override / tambahan aturan
   {
   "rules": {
     "@typescript-eslint/no-unused-vars": "off",

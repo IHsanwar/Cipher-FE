@@ -42,7 +42,7 @@ export default function ChatAssistant() {
   const handleClearChat = async () => {
   try {
     // panggil backend untuk hapus sesi
-    await fetch("https://cipher.ihsanwd10.my.id/api/session-debug", {
+    await fetch("http://127.0.0.1:5000/api/session-debug", {
       method: "POST",
       credentials: "include",
     });
@@ -109,7 +109,7 @@ export default function ChatAssistant() {
   useEffect(() => {
     const handleUnload = () => {
       navigator.sendBeacon(
-        "https://cipher.ihsanwd10.my.id/api/clear-session",
+        "http://127.0.0.1:5000/api/clear-session",
         ""
       );
     };
@@ -162,7 +162,7 @@ export default function ChatAssistant() {
   };
 
   // Create a centralized API function with proper session handling
-  const API_BASE = 'https://cipher.ihsanwd10.my.id';
+  const API_BASE = 'http://127.0.0.1:5000';
 
   const apiCall = async (endpoint: string, options: RequestInit = {}) => {
     const defaultOptions: RequestInit = {
@@ -189,6 +189,32 @@ export default function ChatAssistant() {
     }
   };
 
+  // helper: parse SSE events from stream buffer
+  const parseSSEBuffer = (buffer: string) => {
+    const events: any[] = [];
+    const parts = buffer.split('\n\n');
+    for (let i = 0; i < parts.length - 1; i++) {
+      const part = parts[i].trim();
+      if (!part) continue;
+      const lines = part.split('\n');
+      let dataLines: string[] = [];
+      for (const line of lines) {
+        if (line.startsWith('data:')) {
+          dataLines.push(line.replace(/^data:\s?/, ''));
+        }
+      }
+      if (dataLines.length) {
+        const dataStr = dataLines.join('\n');
+        try {
+          events.push(JSON.parse(dataStr));
+        } catch (e) {
+          // ignore non-json payloads
+        }
+      }
+    }
+    return events;
+  };
+
   // Updated handleSendMessage function
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText !== undefined ? messageText : inputMessage;
@@ -204,55 +230,81 @@ export default function ChatAssistant() {
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsTyping(true);
-
-    // Reset textarea height after clearing input
     setTimeout(adjustTextareaHeight, 0);
 
     try {
-      // Use the centralized API call function
-      const data = await apiCall('/api/chat', {
-        method: 'POST',
-        body: JSON.stringify({ message: textToSend })
-      }) as ApiResponse;
-
+      // create placeholder bot message and stream updates into it
+      const botId = Date.now() + 1;
       const botMessage: Message = {
-        id: Date.now() + 1,
-        text: data.reply_html,
+        id: botId,
+        text: '',
         isBot: true,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botMessage]);
+      
+      const res = await fetch(`${API_BASE}/api/chat`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: textToSend })
+      });
 
-      // Debug session info
-      console.log("🔍 Session Debug:", data.debug);
-      console.log("📝 Bot reply content:", data.reply);
+      if (!res.body) throw new Error('No response body');
 
-      // Handle survey payload extraction
-      let extractedPayload: SurveyData | null = null;
-      const payloadMatch = data.reply.match(/```json([\s\S]*?)```/);
-      if (payloadMatch) {
-        const jsonRaw = payloadMatch[1].trim();
-        extractedPayload = JSON.parse(jsonRaw) as SurveyData;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let buffer = '';
 
-        // Send survey data
-        await apiCall('/api/kirim-survey', {
-          method: 'POST',
-          body: JSON.stringify(extractedPayload)
-        });
+      while (!done) {
+        const { value, done: d } = await reader.read();
+        done = d;
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+          // parse completed SSE events (split by double newline)
+          const events = parseSSEBuffer(buffer);
+          // remove processed parts from buffer
+          const lastDoubleNL = buffer.lastIndexOf('\n\n');
+          if (lastDoubleNL !== -1) {
+            buffer = buffer.slice(lastDoubleNL + 2);
+          }
 
-        console.log("✅ Survey data sent via payload block.");
+          for (const ev of events) {
+            if (ev.error) {
+              throw new Error(ev.error);
+            }
+            if (ev.token) {
+              // append token to existing bot message text
+              setMessages(prev => prev.map(m => m.id === botId ? { ...m, text: (m.text || '') + ev.token } : m));
+            } else if (ev.final) {
+              // replace content with final reply_html (server already renders markdown->html)
+              setMessages(prev => prev.map(m => m.id === botId ? { ...m, text: ev.reply_html } : m));
+
+              // optional: handle survey immediate send if payload present inside reply
+              if (ev.reply && ev.reply.match(/```json/)) {
+                const payloadMatch = ev.reply.match(/```json([\s\S]*?)```/);
+                if (payloadMatch) {
+                  const jsonRaw = payloadMatch[1].trim();
+                  try {
+                    const extractedPayload = JSON.parse(jsonRaw);
+                    await apiCall('/api/kirim-survey', { method: 'POST', body: JSON.stringify(extractedPayload) });
+                  } catch (e) {
+                    console.error('Failed to parse/send survey payload from final reply', e);
+                  }
+                }
+              }
+            } else if (ev.done) {
+              // noop
+            }
+          }
+        }
       }
 
-      // Alternative survey sending
-      if (data.reply.includes("#SEND_SURVEY:OK") && extractedPayload) {
-        await apiCall('/api/kirim-survey', {
-          method: 'POST',
-          body: JSON.stringify(extractedPayload)
-        });
-
-        console.log("✅ Survey data sent via #SEND_SURVEY:OK tag.");
-      }
-
+      // finished streaming
+      console.log('Stream finished');
+       // Debug session info
+      // no-op: final debug will come inside final event if provided
     } catch (err) {
       console.error("❌ Error:", err);
       const errorMessage = err instanceof Error ? err.message : 'Terjadi kesalahan';
