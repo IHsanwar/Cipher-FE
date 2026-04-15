@@ -159,16 +159,16 @@ const FeaturesPage = () => {
             <h2 className="text-3xl font-black mb-16 tracking-tight">Modern Stack Architecture</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-12 items-center justify-center">
               {[
-                { icon: <Code2 />, name: "Next.js 15" },
-                { icon: <Cpu />, name: "GPT-4o API" },
-                { icon: <RefreshCw />, name: "Flask SSE" },
-                { icon: <Globe />, name: "Edge Web" }
+                { icon: Code2, name: "Next.js 15" },
+                { icon: Cpu, name: "GPT-4o API" },
+                { icon: RefreshCw, name: "Flask SSE" },
+                { icon: Globe, name: "Edge Web" }
               ].map((tech, i) => (
                 <div key={i} className="flex flex-col items-center gap-4 group cursor-default">
                   <div className={`p-5 rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:bg-red-500 group-hover:text-white ${
                     isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'
                   }`}>
-                    {React.cloneElement(tech.icon as React.ReactElement, { size: 32 })}
+                    <tech.icon size={32} />
                   </div>
                   <span className="font-bold text-sm tracking-widest uppercase opacity-60 group-hover:opacity-100 transition-opacity">
                     {tech.name}
