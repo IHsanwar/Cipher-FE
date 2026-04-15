@@ -59,3 +59,12 @@ body {
   font-style: italic;
   color: #666;
 }
+
+@keyframes pulse-fast {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.animate-pulse-fast {
+  animation: pulse-fast 0.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

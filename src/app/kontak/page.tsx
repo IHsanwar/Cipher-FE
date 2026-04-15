@@ -1,115 +1,21 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
-import {
-  Sun, Moon, Code, BookOpen, Lightbulb, GraduationCap, Send,
-  Menu, X, Sparkles, Globe, Instagram, Linkedin, MessageCircle, Mail, Phone, MapPin
+import React, { useState, useEffect } from 'react';
+import { 
+  Send, Mail, Phone, Globe, Sparkles, 
+  MapPin, MessageSquare, MessageCircle, Instagram, Linkedin 
 } from 'lucide-react';
-import Link from 'next/link';
-import { Poppins } from "next/font/google";
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
+import { useTheme } from '@/context/ThemeContext';
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  variable: "--font-poppins",
-});
-
-type NavigationProps = {
-  isDark: boolean;
-  toggleTheme: () => void;
-};
-
-// ✅ Component: Navigation bar
-const Navigation = ({ isDark, toggleTheme }: NavigationProps) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  const handleScroll = useCallback(() => {
-    setIsScrolled(window.scrollY > 20);
-  }, []);
+const ContactPage = () => {
+  const { isDarkMode: isDark } = useTheme();
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
-
-  const menuItems = ['Fitur', 'Demo', 'Tutorial', 'Kontak'];
-
-  return (
-    <nav className={`w-full top-0 z-50 transition-all duration-300 ${isScrolled ? 'backdrop-blur-xl bg-white/80 shadow-md' : ''}`}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex justify-between items-center">
-        {/* Logo */}
-        <div className="flex items-center space-x-3">
-          <div className="relative">
-            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg flex items-center justify-center">
-              <Image src="/cipher-logo.png" alt="Cipher Logo" width={80} height={80} />
-            </div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
-          </div>
-          <div className="flex flex-col">
-            <span className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Cipher
-            </span>
-            <span className="text-xs text-red-500 font-medium -mt-1">Pekan IT 2025</span>
-          </div>
-        </div>
-
-        {/* Menu */}
-        <div className="hidden md:flex items-center space-x-8">
-          {menuItems.map((item) => (
-            <a
-              key={item}
-              href={`/${item.toLowerCase()}`}
-              className={`relative font-medium group transition-all ${
-                isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {item}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-red-500 to-red-600 transition-all duration-300 group-hover:w-full"></span>
-            </a>
-          ))}
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center space-x-3">
-          <button onClick={toggleTheme} className="p-3 rounded-xl group transition-all">
-            {isDark ? (
-              <Sun className="w-5 h-5 text-yellow-400" />
-            ) : (
-              <Moon className="w-5 h-5 text-slate-700" />
-            )}
-          </button>
-          <Link href="/chat" className="hidden md:block px-6 py-2.5 bg-red-600 text-white rounded-xl font-medium shadow-lg hover:scale-105 transition-all">
-            Coba Gratis
-          </Link>
-          <button className="md:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden px-6 pb-6">
-          {menuItems.map((item) => (
-            <a key={item} href={`/${item.toLowerCase()}`} className="block py-2 text-sm">
-              {item}
-            </a>
-          ))}
-          <Link href="/chat" className="block mt-4 px-4 py-2 bg-red-600 text-white rounded-lg text-center">
-            Coba Gratis
-          </Link>
-        </div>
-      )}
-    </nav>
-  );
-};
-
-// ✅ Halaman utama: Kontak
-export default function ContactPage() {
-  const [isDark, setIsDark] = useState(false);
-  const toggleTheme = () => setIsDark((prev) => !prev);
+    setIsVisible(true);
+  }, []);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -129,56 +35,194 @@ export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
-    alert('Pesan berhasil dikirim!');
+    alert('Pesan berhasil dikirim! Tim Cipher akan segera menghubungi Anda.');
     setFormData({ name: '', email: '', subject: '', message: '' });
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900 text-white' : 'bg-gray-50 text-black'}`}>
-      {/* Navbar */}
-      <Navigation isDark={isDark} toggleTheme={toggleTheme} />
+    <div className={`min-h-screen transition-all duration-700 selection:bg-red-500/30 ${
+      isDark 
+        ? 'bg-slate-950 text-slate-100' 
+        : 'bg-slate-50 text-slate-900'
+    }`}>
+      <div className="relative z-[100]">
+        <Navigation forceShowBackground />
+      </div>
+      
+      {/* Premium Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className={`absolute top-[20%] right-[-5%] w-[40%] h-[40%] rounded-full blur-[120px] transition-all duration-1000 ${
+          isDark ? 'bg-red-900/10' : 'bg-red-50/50'
+        }`} />
+        <div className={`absolute bottom-[10%] left-[-5%] w-[40%] h-[40%] rounded-full blur-[120px] transition-all duration-1000 ${
+          isDark ? 'bg-blue-900/10' : 'bg-blue-50/40'
+        }`} />
+      </div>
 
-      {/* Form dan Konten */}
-      <main className="max-w-6xl mx-auto py-16 px-4">
-        <h1 className="text-4xl font-bold mb-10 text-center">Hubungi Kami</h1>
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-            <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Nama" required className="w-full p-3 border rounded" />
-            <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" required className="w-full p-3 border rounded" />
-            <input type="text" name="subject" value={formData.subject} onChange={handleInputChange} placeholder="Subjek" className="w-full p-3 border rounded" />
-            <textarea name="message" value={formData.message} onChange={handleInputChange} placeholder="Pesan" rows={5} className="w-full p-3 border rounded"></textarea>
-            <button type="submit" className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-all flex items-center justify-center gap-2">
-              <Send size={18} /> Kirim Pesan
-            </button>
-          </form>
+      <main className="relative z-10 pt-28 pb-32">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          
+          {/* Header */}
+          <div className={`max-w-3xl mx-auto text-center mb-20 space-y-6 transition-all duration-1000 transform ${
+            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
+          }`}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 text-red-500 text-sm font-black tracking-widest border border-red-500/20 uppercase">
+              <Sparkles size={14} /> DUKUNGAN PELANGGAN
+            </div>
+            <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-tight">
+              Hubungi <span className="text-red-600">Kami</span>
+            </h1>
+            <p className={`text-xl font-medium leading-relaxed ${
+              isDark ? 'text-slate-400' : 'text-slate-600'
+            }`}>
+              Ada pertanyaan atau butuh bantuan lebih lanjut? Tim kami siap membantu Anda memaksimalkan pengalaman bersama Cipher AI.
+            </p>
+          </div>
 
-          {/* Kontak Info */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow p-4 flex items-start gap-4">
-              <Mail className="text-red-600" />
-              <div>
-                <h3 className="font-semibold">Email</h3>
-                <p>ihsanwar77@gmail.com</p>
-              </div>
+          <div className="grid lg:grid-cols-5 gap-12 items-start">
+            {/* Form Section */}
+            <div className={`lg:col-span-3 transition-all duration-1000 delay-300 transform ${
+              isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
+            }`}>
+              <form 
+                onSubmit={handleSubmit} 
+                className={`p-10 rounded-[2.5rem] border transition-all duration-500 space-y-6 ${
+                  isDark 
+                    ? 'bg-slate-900/40 border-slate-800 shadow-2xl shadow-black/20' 
+                    : 'bg-white border-slate-200 shadow-xl'
+                }`}
+              >
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-black tracking-widest uppercase opacity-60 ml-1">Nama Lengkap</label>
+                    <input 
+                      type="text" 
+                      name="name" 
+                      value={formData.name} 
+                      onChange={handleInputChange} 
+                      placeholder="Masukkan nama Anda" 
+                      required 
+                      className={`w-full p-4 rounded-2xl border bg-transparent transition-all outline-none focus:ring-2 focus:ring-red-500/50 ${
+                        isDark ? 'border-slate-700 focus:border-red-500' : 'border-slate-200 focus:border-red-500'
+                      }`} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-black tracking-widest uppercase opacity-60 ml-1">Email</label>
+                    <input 
+                      type="email" 
+                      name="email" 
+                      value={formData.email} 
+                      onChange={handleInputChange} 
+                      placeholder="email@example.com" 
+                      required 
+                      className={`w-full p-4 rounded-2xl border bg-transparent transition-all outline-none focus:ring-2 focus:ring-red-500/50 ${
+                        isDark ? 'border-slate-700 focus:border-red-500' : 'border-slate-200 focus:border-red-500'
+                      }`} 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-black tracking-widest uppercase opacity-60 ml-1">Subjek</label>
+                  <input 
+                    type="text" 
+                    name="subject" 
+                    value={formData.subject} 
+                    onChange={handleInputChange} 
+                    placeholder="Apa hal yang ingin Anda tanyakan?" 
+                    className={`w-full p-4 rounded-2xl border bg-transparent transition-all outline-none focus:ring-2 focus:ring-red-500/50 ${
+                      isDark ? 'border-slate-700 focus:border-red-500' : 'border-slate-200 focus:border-red-500'
+                    }`} 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-black tracking-widest uppercase opacity-60 ml-1">Pesan</label>
+                  <textarea 
+                    name="message" 
+                    value={formData.message} 
+                    onChange={handleInputChange} 
+                    placeholder="Tulis pesan Anda di sini..." 
+                    rows={5} 
+                    className={`w-full p-4 rounded-2xl border bg-transparent transition-all outline-none focus:ring-2 focus:ring-red-500/50 resize-none ${
+                      isDark ? 'border-slate-700 focus:border-red-500' : 'border-slate-200 focus:border-red-500'
+                    }`}
+                  ></textarea>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="w-full bg-red-600 text-white p-5 rounded-2xl font-black text-lg shadow-xl shadow-red-600/30 hover:bg-red-700 hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+                >
+                  <Send size={20} /> Kirim Pesan Sekarang
+                </button>
+              </form>
             </div>
-            <div className="bg-white rounded-xl shadow p-4 flex items-start gap-4">
-              <Phone className="text-red-600" />
-              <div>
-                <h3 className="font-semibold">Telepon</h3>
-                <p>+62 812-9308-0153</p>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl shadow p-4 flex items-start gap-4">
-              <Globe className="text-red-600" />
-              <div>
-                <h3 className="font-semibold">Website</h3>
-                <a href="https://ihsanwd10.my.id" target="_blank" className="hover:text-blue-500">ihsanwd10.my.id</a>
+
+            {/* Info Section */}
+            <div className={`lg:col-span-2 space-y-8 transition-all duration-1000 delay-500 transform ${
+              isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
+            }`}>
+              {[
+                { 
+                  icon: <Mail className="text-red-500" />, 
+                  title: "Email", 
+                  content: "ihsanwar77@gmail.com",
+                  sub: "Dapatkan balasan dalam 24 jam"
+                },
+                { 
+                  icon: <Phone className="text-red-500" />, 
+                  title: "Telepon", 
+                  content: "+62 812-9308-0153",
+                  sub: "Tersedia jam 08:00 - 17:00"
+                },
+                { 
+                  icon: <Globe className="text-red-500" />, 
+                  title: "Website", 
+                  content: "ihsanwd10.my.id",
+                  sub: "Kunjungi portfolio pengembang"
+                }
+              ].map((info, i) => (
+                <div 
+                  key={i}
+                  className={`p-8 rounded-3xl border transition-all duration-500 flex gap-6 items-center ${
+                    isDark 
+                      ? 'bg-slate-900/30 border-slate-800/50 hover:bg-slate-900/50' 
+                      : 'bg-white border-slate-100 shadow-md hover:shadow-lg'
+                  }`}
+                >
+                  <div className={`p-4 rounded-2xl ${isDark ? 'bg-slate-800' : 'bg-red-50'}`}>
+                    {info.icon}
+                  </div>
+                  <div>
+                    <div className="text-xs font-black tracking-widest text-red-500 uppercase mb-1">{info.title}</div>
+                    <div className="text-xl font-bold mb-1">{info.content}</div>
+                    <div className={`text-sm opacity-60 font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {info.sub}
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <div className={`p-8 rounded-[2rem] border transition-all duration-500 text-center ${
+                isDark ? 'bg-red-600/10 border-red-500/20' : 'bg-red-500 text-white'
+              }`}>
+                <h3 className="text-xl font-bold mb-4">Ikuti Kami di Media Sosial</h3>
+                <div className="flex justify-center gap-6">
+                  <a href="#" className="p-3 bg-white/10 rounded-xl hover:scale-110 transition-all text-white"><Instagram /></a>
+                  <a href="#" className="p-3 bg-white/10 rounded-xl hover:scale-110 transition-all text-white"><Linkedin /></a>
+                  <a href="#" className="p-3 bg-white/10 rounded-xl hover:scale-110 transition-all text-white"><MessageCircle /></a>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </main>
+
+      <Footer isDark={isDark} />
     </div>
   );
-}
+};
+
+export default ContactPage;
